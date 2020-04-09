@@ -16,9 +16,9 @@ async def on_message(message):
     msg_list = message.content.split(" ")
 
     if "te" in msg_list or "tea" in msg_list:
-        await client.add_reaction(message, u"\U0001F375")
+        await message.add_reaction(u"\U0001F375")
     if "kaffe" in msg_list or "coffee" in msg_list:
-        await client.add_reaction(message, u"\u2615")
+        await message.add_reaction(u"\u2615")
 
 @client.event
 async def on_ready():
