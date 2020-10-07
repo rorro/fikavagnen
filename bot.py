@@ -25,9 +25,7 @@ async def on_message(message):
     last_messages[channel_id] = message
 
 
-    msg = message.content.lower()
-
-    msg_list = msg.split(" ")
+    msg = message.content.lower().encode('ascii', 'ignore').decode('utf-8')
 
     if "te" in msg or "tea" in msg:
         await message.add_reaction(u"\U0001F375")
@@ -41,7 +39,7 @@ async def on_message(message):
     for ty in thanks_yo:
         if ty in msg and channel_id in before_last_messages:
             for reaction in before_last_messages[channel_id].reactions:
-                if reaction.me and reaction.emoji in "🍵☕":
+                if reaction.me and reaction.emoji in "🍵☕" and before_last_messages[channel_id].author.id == message.author.id:
                     await message.add_reaction(u"\U0001F642")
 
 @client.event
