@@ -23,15 +23,15 @@ async def send_embed(cmd, message):
     metric_2_name = ""
 
     if cmd == "fika":
-        embed_title = "Tea and Coffee scores"
+        embed_title = " 🍵 and ☕ scores"
         i = 0
-        metric_1_name = "Tea"
-        metric_2_name = "Coffee"
+        metric_1_name = "🍵"
+        metric_2_name = "☕"
     elif cmd == "tackar":
-        embed_title = "Appreciation scores"
+        embed_title = "👍 scores"
         i = 2
-        metric_1_name = "Thanks"
-        metric_2_name = "@ Thanks"
+        metric_1_name = "👍"
+        metric_2_name = "@ 👍"
     else:
         return
 
@@ -64,7 +64,6 @@ async def on_message(message):
 
     channel_id = message.channel.id
     user_id = message.author.id
-    #print(await client.fetch_user(user_id))
 
     if channel_id in last_messages:
         before_last_messages[channel_id] = last_messages[channel_id]
@@ -79,17 +78,17 @@ async def on_message(message):
         await send_embed(metric, message)
 
     if "te" in msg or "tea" in msg:
-        await message.add_reaction(u"\U0001F375")
+        await message.add_reaction("🍵")
         dbhelper.add_data(user_id, "tea")
 
     if "kaffe" in msg or "coffee" in msg:
-        await message.add_reaction(u"\u2615")
+        await message.add_reaction("☕")
         dbhelper.add_data(user_id, "coffee")
 
     if client.user.mentioned_in(message):
         for ty in thanks_yo:
             if ty in msg:
-                await message.add_reaction(u"\U0001F642")
+                await message.add_reaction("👍")
                 dbhelper.add_data(user_id, "thanks_at")
 
 
@@ -97,7 +96,7 @@ async def on_message(message):
         if ty in msg and channel_id in before_last_messages:
             for reaction in before_last_messages[channel_id].reactions:
                 if reaction.me and reaction.emoji in "🍵☕" and before_last_messages[channel_id].author.id == user_id:
-                    await message.add_reaction(u"\U0001F642")
+                    await message.add_reaction("👍")
                     dbhelper.add_data(user_id, "thanks")
 
 @client.event
@@ -105,7 +104,7 @@ async def on_ready():
     if not Path("database.db").is_file():
         system("sqlite3 database.db < schema.sql")
 
-    await client.change_presence(activity=discord.Game('!scores { fika, tackar }'))
+    await client.change_presence(activity=discord.Game('!scores [fika, tackar]'))
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
