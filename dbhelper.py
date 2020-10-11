@@ -8,7 +8,10 @@ def get_top10(metric):
 
     c.execute(''' select id,''' + metric + ''' from users order by ''' + metric + ''' desc ''')
 
-    return c.fetchall()[:10]
+    res = c.fetchall()[:10]
+    if not res:
+        return []
+    return res
 
     db.close()
 
@@ -23,10 +26,13 @@ def get_user_ranks(user):
         c.execute(''' select id,''' + metric + ''' from users order by ''' + metric + ''' desc ''')
 
         lst = c.fetchall()
-        rank = [x for x,y in enumerate(lst) if y[0] == user][0]
-        score = lst[rank][1]
+        if not lst:
+            data.append((metric, "-", 0))
+        else:
+            rank = [x for x,y in enumerate(lst) if y[0] == user][0]
+            score = lst[rank][1]
 
-        data.append((metric, rank, score))
+            data.append((metric, rank, score))
 
     return data
 

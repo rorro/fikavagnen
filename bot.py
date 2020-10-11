@@ -33,17 +33,22 @@ async def send_top10(channel, top10, metric):
     users = ''
     scores = ''
 
-    for i in range(len(top10)):
-        user = await client.fetch_user(top10[i][0])
+    if not top10:
+        embedMsg.add_field(name="Not enough data to show", value="-", inline=True)
+        embedMsg.color = discord.Color(0xe74c3c)
 
-        ranks += str(i) + '\n'
-        users += user.name + '\n'
-        scores += str(top10[i][1]) + '\n'
+    else:
+        for i in range(len(top10)):
+            user = await client.fetch_user(top10[i][0])
+
+            ranks += str(i) + '\n'
+            users += user.name + '\n'
+            scores += str(top10[i][1]) + '\n'
 
 
-    embedMsg.add_field(name="Rank", value=ranks, inline=True)
-    embedMsg.add_field(name="User", value=users, inline=True)
-    embedMsg.add_field(name="Score", value=scores, inline=True)
+        embedMsg.add_field(name="Rank", value=ranks, inline=True)
+        embedMsg.add_field(name="User", value=users, inline=True)
+        embedMsg.add_field(name="Score", value=scores, inline=True)
 
     await channel.send(embed=embedMsg)
 
