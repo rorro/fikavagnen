@@ -2,6 +2,7 @@ import discord
 import json
 import dbhelper
 import constants
+from unidecode import unidecode
 from commands import *
 from pathlib import Path
 from os import system
@@ -89,7 +90,15 @@ async def on_message(message):
 
     last_messages[channel_id] = message
 
-    msg = message.content.lower().encode('ascii', 'ignore').decode('utf-8')
+    # I know this looks unecessary, but believe me when I say it's
+    # neccessary. Tea and coffee need to be served even if Gabriel speaks
+    # with wrong letters. We don't discriminate against weird letters.
+    msg = ""
+    split_msg = message.content.split()
+    for word in split_msg:
+        msg += unidecode(word).replace(" ", "") + " "
+
+    msg = msg.lower()
 
     if is_command(msg):
         cmd, args = parse_command(msg)
