@@ -1,33 +1,40 @@
 import sqlite3
+import constants
 
-DATABASE = "database.db"
 
-def get_data(user_id, metric):
-    db = sqlite3.connect(DATABASE)
+def get_top10(metric):
+    db = sqlite3.connect(constants.DATABASE)
     c = db.cursor()
 
-    c.execute(''' select ''' + metric + ''' from users where id = ? ''', (user_id, ))
+    c.execute(''' select id,''' + metric + ''' from users order by ''' + metric + ''' desc ''')
 
-    res = c.fetchall()
-    if res:
-        return res[0][0]
-    else:
-        return 0
+    return c.fetchall()[:10]
 
     db.close()
 
-def get_hiscores():
-    db = sqlite3.connect(DATABASE)
+
+def get_user_ranks(user):
+    db = sqlite3.connect(constants.DATABASE)
     c = db.cursor()
 
-    c.execute(''' select * from users ''')
+    data = []
 
-    return c.fetchall()
+    for metric in constants.METRICS:
+        c.execute(''' select id,''' + metric + ''' from users order by ''' + metric + ''' desc ''')
+
+        lst = c.fetchall()
+        rank = [x for x,y in enumerate(lst) if y[0] == user][0]
+        score = lst[rank][1]
+
+        data.append((metric, rank, score))
+
+    return data
 
     db.close()
+
 
 def add_data(user_id, metric):
-    db = sqlite3.connect(DATABASE)
+    db = sqlite3.connect(constants.DATABASE)
     c = db.cursor()
 
     if metric == "tea":
