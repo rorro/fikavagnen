@@ -106,8 +106,8 @@ async def on_message(message):
     # Should only be ran once per channel. Might take a while for
     # old channels with a lot of messages.
     if user_id == 124264008332214276 and "zhulidothething" in msg:
-        print("Adding data")
         messages = await message.channel.history(limit=None).flatten()
+        print("Adding data for " + str(len(messages)) + " messages" )
         for message in messages:
             this_id = message.author.id
             mentioned = client.user.mentioned_in(message)
@@ -122,7 +122,7 @@ async def on_message(message):
                         dbhelper.add_data(this_id, "tea")
                     elif reaction.emoji == "☕":
                         dbhelper.add_data(this_id, "coffee")
-                    elif reaction.emoji == "👍":
+                    elif reaction.emoji in "👍🙂":
                         dbhelper.add_data(this_id, metric)
         print("Done adding data retroactively.")
 
@@ -160,7 +160,7 @@ async def on_message(message):
         if client.user.mentioned_in(message):
             for ty in constants.THANKS_YO:
                 if ty in msg:
-                    await message.add_reaction("👍")
+                    await message.add_reaction("🙂")
                     dbhelper.add_data(user_id, "thanks_at")
 
 
@@ -168,7 +168,7 @@ async def on_message(message):
             if ty in msg and channel_id in before_last_messages:
                 for reaction in before_last_messages[channel_id].reactions:
                     if reaction.me and reaction.emoji in "🍵☕" and before_last_messages[channel_id].author.id == user_id:
-                        await message.add_reaction("👍")
+                        await message.add_reaction("🙂")
                         dbhelper.add_data(user_id, "thanks")
 
 @client.event
