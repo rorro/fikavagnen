@@ -12,8 +12,8 @@ async def get_top10(metric):
     res = c.fetchall()[:10]
     if not res:
         return []
-    return res
 
+    return res
     db.close()
 
 
@@ -36,7 +36,25 @@ async def get_user_ranks(user):
             data.append((metric, rank, score))
 
     return data
+    db.close()
 
+
+async def get_total_data():
+    db = sqlite3.connect(constants.DATABASE)
+    c = db.cursor()
+
+    data = []
+
+    for metric in constants.METRICS:
+        c.execute(''' select sum(''' + metric + ''') from users ''')
+
+        lst = c.fetchall()
+        if not lst:
+            data.append((metric, 0))
+        else:
+            data.append((metric, lst[0][0]))
+
+    return data
     db.close()
 
 

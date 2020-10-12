@@ -23,6 +23,7 @@ async def send_help(channel):
     embedMsg.add_field(name="!top10 {metric}", value="Shows top 10 for a specified metric.", inline=True)
     embedMsg.add_field(name="Valid metrics", value="tea, coffee, thanks, thanks_at", inline=True)
     embedMsg.add_field(name="!ranks", value="Shows your fika ranks.", inline=False)
+    embedMsg.add_field(name="!totals", value="Shows total fika given out.", inline=False)
 
     await channel.send(embed=embedMsg)
 
@@ -47,7 +48,6 @@ async def send_top10(channel, top10, metric):
             users += user.name + '\n'
             scores += str(top10[i][1]) + '\n'
 
-
         embedMsg.add_field(name="Rank", value=ranks, inline=True)
         embedMsg.add_field(name="User", value=users, inline=True)
         embedMsg.add_field(name="Score", value=scores, inline=True)
@@ -64,11 +64,9 @@ async def send_ranks(channel, user_id, data):
     scores = ''
 
     for metric, rank, score in data:
-
         metrics += metric_to_emoji(metric) + '\n'
         ranks += str(rank) + '\n'
         scores += str(score) + '\n'
-
 
     embedMsg.add_field(name="Metric", value=metrics, inline=True)
     embedMsg.add_field(name="Rank", value=ranks, inline=True)
@@ -76,6 +74,20 @@ async def send_ranks(channel, user_id, data):
 
     await channel.send(embed=embedMsg)
 
+async def send_totals(channel, totals):
+    embedMsg = discord.Embed(title="Total fika given", description="")
+
+    metrics = ''
+    scores = ''
+
+    for metric, score in totals:
+        metrics += metric_to_emoji(metric) + '\n'
+        scores += str(score) + '\n'
+
+    embedMsg.add_field(name="Metric", value=metrics, inline=True)
+    embedMsg.add_field(name="Score", value=scores, inline=True)
+
+    await channel.send(embed=embedMsg)
 
 @client.event
 async def on_message(message):
@@ -85,8 +97,6 @@ async def on_message(message):
 
     channel_id = message.channel.id
     user_id = message.author.id
-
-
 
     if channel_id in last_messages:
         before_last_messages[channel_id] = last_messages[channel_id]
@@ -103,31 +113,6 @@ async def on_message(message):
 
     msg = msg.lower()
 
-    # This is to add data fika data retroactively.
-    # Should only be ran once per channel. Might take a while for
-    # old channels with a lot of messages.
-    if user_id == 124264008332214276 and "zhulidothething" in msg:
-        messages = await message.channel.history(limit=None).flatten()
-        print("Adding data for " + str(len(messages)) + " messages" )
-        for message in messages:
-            this_id = message.author.id
-            mentioned = client.user.mentioned_in(message)
-
-            metric = "thanks"
-            if mentioned:
-                metric = "thanks_at"
-
-            for reaction in message.reactions:
-                if reaction.me:
-                    if reaction.emoji == "🍵":
-                        await dbhelper.add_data(this_id, "tea")
-                    elif reaction.emoji == "☕":
-                        await dbhelper.add_data(this_id, "coffee")
-                    elif reaction.emoji in "👍🙂":
-                        await dbhelper.add_data(this_id, metric)
-        print("Done adding data retroactively.")
-
-
     if is_command(msg):
         cmd, args = parse_command(msg)
 
@@ -135,8 +120,14 @@ async def on_message(message):
 
             if cmd == "help":
                 await send_help(message.channel)
+
             elif cmd == "top10":
-                metric = args[0]
+                if len(args) >= 1:
+                    metric = args[0]
+                else:
+                    await message.add_reaction("❌")
+                    return
+
                 if is_valid_metric(metric):
                     top10 = await dbhelper.get_top10(metric)
                     await send_top10(message.channel, top10, metric)
@@ -146,6 +137,10 @@ async def on_message(message):
             elif cmd == "ranks":
                 ranks = await dbhelper.get_user_ranks(user_id)
                 await send_ranks(message.channel, user_id, ranks)
+
+            elif cmd == "totals":
+                totals = await dbhelper.get_total_data()
+                await send_totals(message.channel, totals)
 
         else:
             await message.add_reaction("❌")
