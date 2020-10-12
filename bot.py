@@ -85,6 +85,8 @@ async def on_message(message):
     channel_id = message.channel.id
     user_id = message.author.id
 
+
+
     if channel_id in last_messages:
         before_last_messages[channel_id] = last_messages[channel_id]
 
@@ -99,6 +101,31 @@ async def on_message(message):
         msg += unidecode(word).replace(" ", "") + " "
 
     msg = msg.lower()
+
+    # This is to add data fika data retroactively.
+    # Should only be ran once per channel. Might take a while for
+    # old channels with a lot of messages.
+    if user_id == 124264008332214276 and "zhulidothething" in msg:
+        print("Adding data")
+        messages = await message.channel.history(limit=None).flatten()
+        for message in messages:
+            this_id = message.author.id
+            mentioned = client.user.mentioned_in(message)
+
+            metric = "thanks"
+            if mentioned:
+                metric = "thanks_at"
+
+            for reaction in message.reactions:
+                if reaction.me:
+                    if reaction.emoji == "🍵":
+                        dbhelper.add_data(this_id, "tea")
+                    elif reaction.emoji == "☕":
+                        dbhelper.add_data(this_id, "coffee")
+                    elif reaction.emoji == "👍":
+                        dbhelper.add_data(this_id, metric)
+        print("Done adding data retroactively.")
+
 
     if is_command(msg):
         cmd, args = parse_command(msg)
