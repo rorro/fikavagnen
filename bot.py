@@ -6,6 +6,7 @@ from unidecode import unidecode
 from commands import *
 from pathlib import Path
 from os import system
+import asyncio
 
 # Get token
 with open('auth.json') as f:
@@ -119,11 +120,11 @@ async def on_message(message):
             for reaction in message.reactions:
                 if reaction.me:
                     if reaction.emoji == "🍵":
-                        dbhelper.add_data(this_id, "tea")
+                        await dbhelper.add_data(this_id, "tea")
                     elif reaction.emoji == "☕":
-                        dbhelper.add_data(this_id, "coffee")
+                        await dbhelper.add_data(this_id, "coffee")
                     elif reaction.emoji in "👍🙂":
-                        dbhelper.add_data(this_id, metric)
+                        await dbhelper.add_data(this_id, metric)
         print("Done adding data retroactively.")
 
 
@@ -137,13 +138,13 @@ async def on_message(message):
             elif cmd == "top10":
                 metric = args[0]
                 if is_valid_metric(metric):
-                    top10 = dbhelper.get_top10(metric)
+                    top10 = await dbhelper.get_top10(metric)
                     await send_top10(message.channel, top10, metric)
                 else:
                     await message.add_reaction("❌")
 
             elif cmd == "ranks":
-                ranks = dbhelper.get_user_ranks(user_id)
+                ranks = await dbhelper.get_user_ranks(user_id)
                 await send_ranks(message.channel, user_id, ranks)
 
         else:
@@ -151,17 +152,17 @@ async def on_message(message):
     else:
         if "te" in msg or "tea" in msg:
             await message.add_reaction("🍵")
-            dbhelper.add_data(user_id, "tea")
+            await dbhelper.add_data(user_id, "tea")
 
         if "kaffe" in msg or "coffee" in msg:
             await message.add_reaction("☕")
-            dbhelper.add_data(user_id, "coffee")
+            await dbhelper.add_data(user_id, "coffee")
 
         if client.user.mentioned_in(message):
             for ty in constants.THANKS_YO:
                 if ty in msg:
                     await message.add_reaction("🙂")
-                    dbhelper.add_data(user_id, "thanks_at")
+                    await dbhelper.add_data(user_id, "thanks_at")
 
 
         for ty in constants.THANKS_YO:
@@ -169,7 +170,7 @@ async def on_message(message):
                 for reaction in before_last_messages[channel_id].reactions:
                     if reaction.me and reaction.emoji in "🍵☕" and before_last_messages[channel_id].author.id == user_id:
                         await message.add_reaction("🙂")
-                        dbhelper.add_data(user_id, "thanks")
+                        await dbhelper.add_data(user_id, "thanks")
 
 @client.event
 async def on_ready():

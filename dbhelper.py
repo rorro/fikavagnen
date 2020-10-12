@@ -1,8 +1,9 @@
 import sqlite3
 import constants
+import asyncio
 
 
-def get_top10(metric):
+async def get_top10(metric):
     db = sqlite3.connect(constants.DATABASE)
     c = db.cursor()
 
@@ -16,7 +17,7 @@ def get_top10(metric):
     db.close()
 
 
-def get_user_ranks(user):
+async def get_user_ranks(user):
     db = sqlite3.connect(constants.DATABASE)
     c = db.cursor()
 
@@ -39,7 +40,7 @@ def get_user_ranks(user):
     db.close()
 
 
-def add_data(user_id, metric):
+async def add_data(user_id, metric):
     db = sqlite3.connect(constants.DATABASE)
     c = db.cursor()
 
