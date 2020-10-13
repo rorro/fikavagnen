@@ -2,7 +2,6 @@ import discord
 import json
 import dbhelper
 import constants
-from unidecode import unidecode
 from commands import *
 from pathlib import Path
 from os import system
@@ -103,9 +102,6 @@ async def on_message(message):
 
     last_messages[channel_id] = message
 
-    # I know this looks unecessary, but believe me when I say it's
-    # neccessary. Tea and coffee need to be served even if Gabriel speaks
-    # with wrong letters. We don't discriminate against weird letters.
     msg = message.content.lower()
 
     if is_command(msg):
