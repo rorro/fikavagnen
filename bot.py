@@ -106,12 +106,7 @@ async def on_message(message):
     # I know this looks unecessary, but believe me when I say it's
     # neccessary. Tea and coffee need to be served even if Gabriel speaks
     # with wrong letters. We don't discriminate against weird letters.
-    msg = ""
-    split_msg = message.content.split()
-    for word in split_msg:
-        msg += unidecode(word).replace(" ", "") + " "
-
-    msg = msg.lower()
+    msg = message.content.lower()
 
     if is_command(msg):
         cmd, args = parse_command(msg)
@@ -145,22 +140,23 @@ async def on_message(message):
         else:
             await message.add_reaction("❌")
     else:
-        if "te" in msg or "tea" in msg:
-            await message.add_reaction("🍵")
-            await dbhelper.add_data(user_id, "tea")
+        for te in constants.TEA:
+            if te in msg:
+                await message.add_reaction("🍵")
+                await dbhelper.add_data(user_id, "tea")
 
-        if "kaffe" in msg or "coffee" in msg:
-            await message.add_reaction("☕")
-            await dbhelper.add_data(user_id, "coffee")
+        for coffee in constants.COFFEE:
+            if coffee in msg:
+                await message.add_reaction("☕")
+                await dbhelper.add_data(user_id, "coffee")
 
         if client.user.mentioned_in(message):
-            for ty in constants.THANKS_YO:
+            for ty in constants.THANKS:
                 if ty in msg:
                     await message.add_reaction("🙂")
                     await dbhelper.add_data(user_id, "thanks_at")
 
-
-        for ty in constants.THANKS_YO:
+        for ty in constants.THANKS:
             if ty in msg and channel_id in before_last_messages:
                 for reaction in before_last_messages[channel_id].reactions:
                     if reaction.me and reaction.emoji in "🍵☕" and before_last_messages[channel_id].author.id == user_id:
