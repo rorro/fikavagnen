@@ -30,5 +30,21 @@ def metric_to_emoji(metric):
         return "🙏"
     elif metric == "thanks_at":
         return "@🙏"
+    elif metric == "no_thanks":
+        return "🙄"
     else:
         return metric
+
+def emoji_to_metric(emoji):
+    if emoji == "🍵":
+        return "tea"
+    elif emoji == "☕":
+        return "coffee"
+    elif emoji == "🙏":
+        return "thanks"
+    elif emoji == "@🙏":
+        return "thanks_at"
+    elif emoji == "🙄":
+        return "no_thanks"
+    else:
+        return emoji

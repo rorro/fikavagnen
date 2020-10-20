@@ -63,16 +63,27 @@ async def add_data(user_id, metric):
     c = db.cursor()
 
     if metric == "tea":
-        values = "(?, 1, 0, 0, 0)"
+        values = "(?, 1, 0, 0, 0, 0)"
     elif metric == "coffee":
-        values = "(?, 0, 1, 0, 0)"
+        values = "(?, 0, 1, 0, 0, 0)"
     elif metric == "thanks":
-        values = "(?, 0, 0, 1, 0)"
+        values = "(?, 0, 0, 1, 0, 0)"
+    elif metric == "thanks_at":
+        values = "(?, 0, 0, 0, 1, 0)"
     else:
-        values = "(?, 0, 0, 0, 1)"
+        values = "(?, 0, 0, 0, 0, 1)"
 
 
-    c.execute(''' insert into users (id, tea, coffee, thanks, thanks_at) values ''' + values + ''' on conflict(id) do update set ''' + metric + ''' = ''' + metric + ''' + 1 ''', (user_id, ))
+    c.execute(''' insert into users (id, tea, coffee, thanks, thanks_at, no_thanks) values ''' + values + ''' on conflict(id) do update set ''' + metric + ''' = ''' + metric + ''' + 1 ''', (user_id, ))
+
+    db.commit()
+    db.close()
+
+async def remove_data(user_id, metric):
+    db = sqlite3.connect(constants.DATABASE)
+    c = db.cursor()
+
+    c.execute(''' update users set ''' + metric + ''' = ''' + metric + ''' - 1 ''')
 
     db.commit()
     db.close()

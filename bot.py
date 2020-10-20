@@ -20,7 +20,7 @@ async def send_help(channel):
     embedMsg = discord.Embed(title="PANIC!", description="")
     embedMsg.add_field(name="!help", value="Shows this menu.", inline=False)
     embedMsg.add_field(name="!top10 {metric}", value="Shows top 10 for a specified metric.", inline=True)
-    embedMsg.add_field(name="Valid metrics", value="tea, coffee, thanks, thanks_at", inline=True)
+    embedMsg.add_field(name="Valid metrics", value="tea, coffee, thanks, thanks_at, no_thanks", inline=True)
     embedMsg.add_field(name="!ranks", value="Shows your fika ranks.", inline=False)
     embedMsg.add_field(name="!totals", value="Shows total fika given out.", inline=False)
 
@@ -140,17 +140,31 @@ async def on_message(message):
             if te in msg:
                 await message.add_reaction("🍵")
                 await dbhelper.add_data(user_id, "tea")
+                break
 
         for coffee in constants.COFFEE:
             if coffee in msg:
                 await message.add_reaction("☕")
                 await dbhelper.add_data(user_id, "coffee")
+                break
 
         if client.user.mentioned_in(message):
             for ty in constants.THANKS:
                 if ty in msg:
                     await message.add_reaction("🙂")
                     await dbhelper.add_data(user_id, "thanks_at")
+                    break
+
+        for noty in constants.NO_THANKS:
+            if noty in msg and channel_id in before_last_messages:
+                for reaction in before_last_messages[channel_id].reactions:
+                    if reaction.me and before_last_messages[channel_id].author.id == user_id:
+                        if reaction.emoji in "🍵☕":
+                            await before_last_messages[channel_id].remove_reaction(reaction.emoji, client.user)
+                            await dbhelper.remove_data(user_id, emoji_to_metric(reaction.emoji))
+                await message.add_reaction("🙄")
+                await dbhelper.add_data(user_id, "no_thanks")
+                return
 
         for ty in constants.THANKS:
             if ty in msg and channel_id in before_last_messages:

@@ -5,5 +5,6 @@ CREATE TABLE if not exists users (
     tea integer,
     coffee integer,
     thanks integer,
-    thanks_at integer
+    thanks_at integer,
+    no_thanks integer
 );
