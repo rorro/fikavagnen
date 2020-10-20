@@ -156,15 +156,16 @@ async def on_message(message):
                     break
 
         for noty in constants.NO_THANKS:
+            remove = False
             if noty in msg and channel_id in before_last_messages:
                 for reaction in before_last_messages[channel_id].reactions:
-                    if reaction.me and before_last_messages[channel_id].author.id == user_id:
-                        if reaction.emoji in "🍵☕":
+                    if reaction.me and reaction.emoji in "🍵☕" and before_last_messages[channel_id].author.id == user_id:
                             await before_last_messages[channel_id].remove_reaction(reaction.emoji, client.user)
-                            await dbhelper.remove_data(user_id, emoji_to_metric(reaction.emoji))
-                await message.add_reaction("🙄")
-                await dbhelper.add_data(user_id, "no_thanks")
-                return
+                            remove = True
+                if remove:
+                    await message.add_reaction("🙄")
+                    await dbhelper.add_data(user_id, "no_thanks")
+                    return
 
         for ty in constants.THANKS:
             if ty in msg and channel_id in before_last_messages:
