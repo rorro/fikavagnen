@@ -43,6 +43,8 @@ async def send_help(channel):
     embedMsg.add_field(name="Valid metrics", value="tea, coffee, thanks, thanks_at, no_thanks", inline=True)
     embedMsg.add_field(name="!ranks", value="Shows your fika ranks.", inline=False)
     embedMsg.add_field(name="!totals", value="Shows total fika given out.", inline=False)
+    embedMsg.add_field(name="!allowfika", value="Allows fikavagnen to servera fika. You have to be a board member to use this.", inline=False)
+    embedMsg.add_field(name="!disallowfika", value="Revokes fikavagnens ability att servera fika. You have to be a board member to use this.", inline=False)
 
     await channel.send(embed=embedMsg)
 
