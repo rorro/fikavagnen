@@ -35,6 +35,7 @@ def metric_to_emoji(metric):
     else:
         return metric
 
+
 def emoji_to_metric(emoji):
     if emoji == "🍵":
         return "tea"
