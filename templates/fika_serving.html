@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                font-family: "PT Sans", Helvetica, Arial, sans-serif;
+                background-color: #202020;
+                color: #eee;
+            }
+
+            article {
+                max-width: 50em;
+                margin: auto;
+            }
+
+            h1 {
+                font-size: 3em;
+            }
+
+            .important {
+                font-weight: bold;
+            }
+
+            .total_entry {
+                display: inline;
+                margin-right: 20px;
+            }
+
+            .title {
+                font-weight: bold;
+                margin-bottom: 0px;
+            }
+
+            .metric {
+                display: inline;
+            }
+
+            .score {
+                margin-right: 10px;
+            }
+
+            .wrapper {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            li {
+                list-style-type: none;
+                margin-left: -20px;
+            }
+
+            li:nth-child(2n) {
+                background: #242424;
+            }
+        </style>
+    </head>
+    <body>
+	<p class="title">Total served</p>
+    <div>
+	{% for item in totals: %}
+	<p class="metric">{{ item }}</p> <span class="score">{{ totals[item] }}</span>
+	{% endfor %}
+    </div>
+
+	<p class="title">Top tens</p>
+    <div class="wrapper">
+	{% for item in top: %}
+        <div class="top-thing">
+        <p class="title">{{ item }}</p>
+        <ul>
+        {% for person in top[item] %}
+            <li>{{ person[1] }}. {{ person[0] }}</li>
+        {% endfor %}
+        </ul>
+        </div>
+        {% endfor %}
+    </div>
+    </body>
+</html>

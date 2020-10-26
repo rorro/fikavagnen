@@ -63,10 +63,8 @@ async def send_top10(channel, top10, metric):
 
     else:
         for i in range(len(top10)):
-            user = await client.fetch_user(top10[i][0])
-
             ranks += str(i) + '\n'
-            users += user.name + '\n'
+            users += top10[i][0] + '\n'
             scores += str(top10[i][1]) + '\n'
 
         embedMsg.add_field(name="Rank", value=ranks, inline=True)
@@ -76,9 +74,8 @@ async def send_top10(channel, top10, metric):
     await channel.send(embed=embedMsg)
 
 
-async def send_ranks(channel, user_id, data):
-    user = await client.fetch_user(user_id)
-    embedMsg = discord.Embed(title="Fika ranks for " + user.name, description="")
+async def send_ranks(channel, author_name, data):
+    embedMsg = discord.Embed(title="Fika ranks for " + author_name, description="")
 
     metrics = ''
     ranks = ''
@@ -95,6 +92,7 @@ async def send_ranks(channel, user_id, data):
 
     await channel.send(embed=embedMsg)
 
+
 async def send_totals(channel, totals):
     embedMsg = discord.Embed(title="Total fika given", description="")
 
@@ -110,10 +108,12 @@ async def send_totals(channel, totals):
 
     await channel.send(embed=embedMsg)
 
+
 @client.event
 async def on_message(message):
     channel_id = message.channel.id
-    user_id = message.author.id
+    author_id = message.author.id
+    author_name = message.author.name
     is_board = "board" in [y.name.lower() for y in message.author.roles]
 
     # Prevent from replying to self
@@ -148,8 +148,6 @@ async def on_message(message):
                 with open('fikavagn.conf', 'w') as conf:
                     config_obj.write(conf)
 
-                print(await client.fetch_user(user_id), "added '" + str(message.channel) + "' to allowed fika channels")
-
             elif cmd == "disallowfika" and is_board:
                 if str(channel_id) not in ALLOWED_CHANNELS:
                     return
@@ -167,8 +165,6 @@ async def on_message(message):
                 with open('fikavagn.conf', 'w') as conf:
                     config_obj.write(conf)
 
-                print(await client.fetch_user(user_id), "removed '" + str(message.channel) + "' from allowed fika channels")
-
             if str(channel_id) in ALLOWED_CHANNELS:
                 if cmd == "help":
                     await send_help(message.channel)
@@ -181,17 +177,17 @@ async def on_message(message):
                         return
 
                     if is_valid_metric(metric):
-                        top10 = await dbhelper.get_top10(metric)
+                        top10 = dbhelper.get_top10(metric)
                         await send_top10(message.channel, top10, metric)
                     else:
                         await message.add_reaction("❌")
 
                 elif cmd == "ranks":
-                    ranks = await dbhelper.get_user_ranks(user_id)
-                    await send_ranks(message.channel, user_id, ranks)
+                    ranks = dbhelper.get_user_ranks(author_id)
+                    await send_ranks(message.channel, author_name, ranks)
 
                 elif cmd == "totals":
-                    totals = await dbhelper.get_total_data()
+                    totals = dbhelper.get_total_data()
                     await send_totals(message.channel, totals)
 
         else:
@@ -201,40 +197,40 @@ async def on_message(message):
             for te in constants.TEA:
                 if te in msg:
                     await message.add_reaction("🍵")
-                    await dbhelper.add_data(user_id, "tea")
+                    dbhelper.add_data(author_id, author_name, "tea")
                     break
 
             for coffee in constants.COFFEE:
                 if coffee in msg:
                     await message.add_reaction("☕")
-                    await dbhelper.add_data(user_id, "coffee")
+                    dbhelper.add_data(author_id, author_name, "coffee")
                     break
 
             if client.user.mentioned_in(message):
                 for ty in constants.THANKS:
                     if ty in msg:
                         await message.add_reaction("🙂")
-                        await dbhelper.add_data(user_id, "thanks_at")
+                        dbhelper.add_data(author_id, author_name, "thanks_at")
                         break
 
             for noty in constants.NO_THANKS:
                 remove = False
                 if noty in msg and channel_id in before_last_messages:
                     for reaction in before_last_messages[channel_id].reactions:
-                        if reaction.me and reaction.emoji in "🍵☕" and before_last_messages[channel_id].author.id == user_id:
+                        if reaction.me and reaction.emoji in "🍵☕" and before_last_messages[channel_id].author.id == author_id:
                                 await before_last_messages[channel_id].remove_reaction(reaction.emoji, client.user)
                                 remove = True
                     if remove:
                         await message.add_reaction("🙄")
-                        await dbhelper.add_data(user_id, "no_thanks")
+                        dbhelper.add_data(author_id, author_name, "no_thanks")
                         return
 
             for ty in constants.THANKS:
                 if ty in msg and channel_id in before_last_messages:
                     for reaction in before_last_messages[channel_id].reactions:
-                        if reaction.me and reaction.emoji in "🍵☕" and before_last_messages[channel_id].author.id == user_id:
+                        if reaction.me and reaction.emoji in "🍵☕" and before_last_messages[channel_id].author.id == author_id:
                             await message.add_reaction("🙂")
-                            await dbhelper.add_data(user_id, "thanks")
+                            dbhelper.add_data(author_id, author_name, "thanks")
 
 
 @client.event
