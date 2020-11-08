@@ -6,7 +6,7 @@ from commands import *
 from pathlib import Path
 from os import system
 from configparser import ConfigParser
-import asyncio
+import datetime
 
 client = discord.Client()
 last_messages = {}
@@ -14,6 +14,7 @@ before_last_messages = {}
 
 config_obj = ConfigParser()
 ALLOWED_CHANNELS = []
+MEETUP_START = datetime.time(17, 15)
 
 # Get token
 with open('auth.json') as f:
@@ -108,17 +109,30 @@ async def send_totals(channel, totals):
 
     await channel.send(embed=embedMsg)
 
+def is_meetup(right_now):
+    day = right_now.weekday()
+    hour = right_now.time().hour
+    minute = right_now.time().minute
+    time = datetime.time(hour, minute)
+
+    # If it's Tuesday and after 17:15
+    if 1 == day and time >= MEETUP_START:
+        return True
+    return False
+
 
 @client.event
 async def on_message(message):
+    # Prevent from replying to self
+    if message.author == client.user:
+        return
+
+    time = datetime.datetime.today()
+
     channel_id = message.channel.id
     author_id = message.author.id
     author_name = message.author.name
     is_board = "board" in [y.name.lower() for y in message.author.roles]
-
-    # Prevent from replying to self
-    if message.author == client.user:
-        return
 
     if channel_id in last_messages:
         before_last_messages[channel_id] = last_messages[channel_id]
@@ -165,7 +179,7 @@ async def on_message(message):
                 with open('fikavagn.conf', 'w') as conf:
                     config_obj.write(conf)
 
-            if str(channel_id) in ALLOWED_CHANNELS:
+            if str(channel_id) in ALLOWED_CHANNELS and is_meetup(time):
                 if cmd == "help":
                     await send_help(message.channel)
 
@@ -173,14 +187,11 @@ async def on_message(message):
                     if len(args) >= 1:
                         metric = args[0]
                     else:
-                        await message.add_reaction("❌")
                         return
 
                     if is_valid_metric(metric):
                         top10 = dbhelper.get_top10(metric)
                         await send_top10(message.channel, top10, metric)
-                    else:
-                        await message.add_reaction("❌")
 
                 elif cmd == "ranks":
                     ranks = dbhelper.get_user_ranks(author_id)
@@ -189,11 +200,8 @@ async def on_message(message):
                 elif cmd == "totals":
                     totals = dbhelper.get_total_data()
                     await send_totals(message.channel, totals)
-
-        else:
-            await message.add_reaction("❌")
     else:
-        if str(channel_id) in ALLOWED_CHANNELS:
+        if str(channel_id) in ALLOWED_CHANNELS and is_meetup(time):
             for te in constants.TEA:
                 if te in msg:
                     await message.add_reaction("🍵")
@@ -238,7 +246,7 @@ async def on_ready():
     if not Path("database.db").is_file():
         system("sqlite3 database.db < schema.sql")
 
-    await client.change_presence(activity=discord.Game('!help'))
+    await client.change_presence(activity=discord.Game('Only during meetups'))
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
