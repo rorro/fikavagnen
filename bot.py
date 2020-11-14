@@ -109,17 +109,6 @@ async def send_totals(channel, totals):
 
     await channel.send(embed=embedMsg)
 
-def is_meetup(right_now):
-    day = right_now.weekday()
-    hour = right_now.time().hour
-    minute = right_now.time().minute
-    time = datetime.time(hour, minute)
-
-    # If it's Tuesday and after 17:15
-    if 1 == day and time >= MEETUP_START:
-        return True
-    return False
-
 
 @client.event
 async def on_message(message):
@@ -246,7 +235,7 @@ async def on_ready():
     if not Path("database.db").is_file():
         system("sqlite3 database.db < schema.sql")
 
-    await client.change_presence(activity=discord.Game('Only during meetups'))
+    await client.change_presence(activity=discord.Game('https://www.bestapi.nu/fikavagnen'))
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
