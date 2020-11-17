@@ -14,7 +14,6 @@ before_last_messages = {}
 
 config_obj = ConfigParser()
 ALLOWED_CHANNELS = []
-MEETUP_START = datetime.time(17, 15)
 
 # Get token
 with open('auth.json') as f:
@@ -235,7 +234,7 @@ async def on_ready():
     if not Path("database.db").is_file():
         system("sqlite3 database.db < schema.sql")
 
-    await client.change_presence(activity=discord.Game('https://www.bestapi.nu/fikavagnen'))
+    await client.change_presence(activity=discord.Game('https://www.bestapi.nu/fikavagn'))
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
