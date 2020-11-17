@@ -58,6 +58,6 @@ def is_meetup(right_now):
     time = datetime.time(hour, minute)
 
     # If it's Tuesday and after 17:15
-    if 1 == day and time >= MEETUP_START:
+    if 1 == day and time >= constants.MEETUP_START:
         return True
     return False
