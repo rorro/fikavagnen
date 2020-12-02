@@ -17,7 +17,6 @@ before_last_messages = {}
 
 config_obj = ConfigParser()
 ALLOWED_CHANNELS = []
-MEETUP_START = datetime.time(17, 15)
 
 class FikaHandler(FileSystemEventHandler):
     def on_modified(self, event):
@@ -118,7 +117,6 @@ async def send_totals(channel, totals):
 
     await channel.send(embed=embedMsg)
 
-
 def is_meetup(right_now):
     day = right_now.weekday()
     hour = right_now.time().hour
@@ -129,7 +127,6 @@ def is_meetup(right_now):
     if 1 == day and time >= MEETUP_START:
         return True
     return False
-
 
 def toggle_fika():
     f = open('fikatimeteller', 'r')
@@ -145,7 +142,6 @@ def toggle_fika():
 
 @client.event
 async def on_message(message):
-    print(message)
     # Prevent from replying to self
     if message.author == client.user:
         return
@@ -266,11 +262,9 @@ async def on_message(message):
 
 @client.event
 async def on_ready():
-    print("checking db")
     if not Path("database.db").is_file():
         system("sqlite3 database.db < schema.sql")
 
-    print("setting presence")
     await client.change_presence(activity=discord.Game('I only work during meetups.'))
 
     print('Logged in as')

@@ -1,4 +1,5 @@
 import constants
+import datetime
 
 def is_command(msg):
     return msg.startswith("!")
@@ -27,9 +28,9 @@ def metric_to_emoji(metric):
     elif metric == "coffee":
         return "☕"
     elif metric == "thanks":
-        return "🙏"
+        return "🙂"
     elif metric == "thanks_at":
-        return "@🙏"
+        return "@🙂"
     elif metric == "no_thanks":
         return "🙄"
     else:
@@ -41,11 +42,22 @@ def emoji_to_metric(emoji):
         return "tea"
     elif emoji == "☕":
         return "coffee"
-    elif emoji == "🙏":
+    elif emoji == "🙂":
         return "thanks"
-    elif emoji == "@🙏":
+    elif emoji == "@🙂":
         return "thanks_at"
     elif emoji == "🙄":
         return "no_thanks"
     else:
         return emoji
+
+def is_meetup(right_now):
+    day = right_now.weekday()
+    hour = right_now.time().hour
+    minute = right_now.time().minute
+    time = datetime.time(hour, minute)
+
+    # If it's Tuesday and after 17:15
+    if 1 == day and time >= constants.MEETUP_START:
+        return True
+    return False
