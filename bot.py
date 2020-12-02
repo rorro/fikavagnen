@@ -7,6 +7,9 @@ from pathlib import Path
 from os import system
 from configparser import ConfigParser
 import datetime
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import asyncio
 
 client = discord.Client()
 last_messages = {}
@@ -16,9 +19,15 @@ config_obj = ConfigParser()
 ALLOWED_CHANNELS = []
 MEETUP_START = datetime.time(17, 15)
 
+class FikaHandler(FileSystemEventHandler):
+    def on_modified(self, event):
+        toggle_fika()
+
+
 # Get token
 with open('auth.json') as f:
     TOKEN = json.load(f)['token']
+
 
 # create config if it doesn't exist
 if not Path('fikavagn.conf').is_file():
@@ -109,6 +118,7 @@ async def send_totals(channel, totals):
 
     await channel.send(embed=embedMsg)
 
+
 def is_meetup(right_now):
     day = right_now.weekday()
     hour = right_now.time().hour
@@ -121,8 +131,21 @@ def is_meetup(right_now):
     return False
 
 
+def toggle_fika():
+    f = open('fikatimeteller', 'r')
+    fikatime = f.readline().rstrip() == 'yes'
+
+    if fikatime:
+        message = "FIKATIME!!!!"
+    else:
+        message = "It's not fikatime :("
+
+    asyncio.run(client.change_presence(activity=discord.Game(message)))
+
+
 @client.event
 async def on_message(message):
+    print(message)
     # Prevent from replying to self
     if message.author == client.user:
         return
@@ -243,13 +266,30 @@ async def on_message(message):
 
 @client.event
 async def on_ready():
+    print("checking db")
     if not Path("database.db").is_file():
         system("sqlite3 database.db < schema.sql")
 
-    await client.change_presence(activity=discord.Game('Only during meetups'))
+    print("setting presence")
+    await client.change_presence(activity=discord.Game('I only work during meetups.'))
+
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
     print('------')
 
-client.run(TOKEN)
+
+try:
+    fika_handler = FikaHandler()
+    observer = Observer()
+    observer.schedule(fika_handler, path='fikatimeteller', recursive=False)
+    observer.start()
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(client.start(TOKEN))
+except KeyboardInterrupt:
+    observer.stop()
+    observer.join()
+    loop.run_until_complete(client.logout())
+finally:
+    loop.close()
