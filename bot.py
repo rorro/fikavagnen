@@ -20,7 +20,7 @@ ALLOWED_CHANNELS = []
 
 class FikaHandler(FileSystemEventHandler):
     def on_modified(self, event):
-        toggle_fika()
+        update_presence()
 
 
 # Get token
@@ -128,15 +128,9 @@ def is_meetup(right_now):
         return True
     return False
 
-def toggle_fika():
+def update_presence():
     f = open('fikatimeteller', 'r')
-    fikatime = f.readline().rstrip() == 'yes'
-
-    if fikatime:
-        message = "FIKATIME!!!!"
-    else:
-        message = "It's not fikatime :("
-
+    message = f.readline().rstrip()
     asyncio.run(client.change_presence(activity=discord.Game(message)))
 
 
