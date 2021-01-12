@@ -17,9 +17,9 @@ def serve_fikavagn():
 def serve_inner_fika():
     temp = dbhelper.get_total_data()
 
-    fikatime = "Nej :("
-    if is_meetup(datetime.datetime.today()):
-        fikatime = "JA!!"
+    f = open('fikatimeteller', 'r')
+    message = f.readline().rstrip()
+    f.close()
 
     total_data = {}
     for metric, score in temp:
@@ -35,7 +35,7 @@ def serve_inner_fika():
             top_ten_this_metric.append([str(user), str(score)])
         top_tens[emoji_metric] = top_ten_this_metric
 
-    return render_template("fika_serving.html", totals=total_data, top=top_tens, fikadags=fikatime)
+    return render_template("fika_serving.html", totals=total_data, top=top_tens, fikadags=message)
 
 @app.errorhandler(404)
 def page_not_found(e):
