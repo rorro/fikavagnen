@@ -3,3 +3,4 @@ __pycache__
 database.db
 fikavagn.conf
 start_stop_fika.sh
+fikatimeteller
